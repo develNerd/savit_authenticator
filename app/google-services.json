@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "843453559006",
+    "project_id": "savit-authenticator",
+    "storage_bucket": "savit-authenticator.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:843453559006:android:c1e7d15ac19c12dc4a924f",
+        "android_client_info": {
+          "package_name": "org.savit.savitauthenticator"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "843453559006-durntmrk3ei0tbm2a6eoo8486fm62qmv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.savit.savitauthenticator",
+            "certificate_hash": "0a9d41e1c4845c15cebea5818b19d0d4a7b37eb6"
+          }
+        },
+        {
+          "client_id": "843453559006-52apujghupffrqhq53ntavprnauue0d9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA17h6_7lI-0wYlM-RU-9twtLj8E7u3sp8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "843453559006-52apujghupffrqhq53ntavprnauue0d9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
