@@ -11,7 +11,7 @@ android {
     buildToolsVersion "30.0.3"
 
     defaultConfig {
-        applicationId "org.mesika.savitauthenticator"
+        applicationId "org.savit.savitauthenticator"
         minSdk 21
         targetSdk 30
         versionCode 1

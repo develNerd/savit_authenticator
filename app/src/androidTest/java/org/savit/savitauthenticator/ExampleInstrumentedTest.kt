@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("org.mesika.savitauthenticator", appContext.packageName)
+        assertEquals("org.savit.savitauthenticator", appContext.packageName)
     }
 }
