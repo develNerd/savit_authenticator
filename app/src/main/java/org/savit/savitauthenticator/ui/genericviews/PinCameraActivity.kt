@@ -36,6 +36,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.getViewModel
 import org.savit.savitauthenticator.R
 import org.savit.savitauthenticator.model.EncryptedDatabase
 import org.savit.savitauthenticator.ui.genericviews.viewmodel.PinCameraViewmodel
@@ -76,7 +77,7 @@ class PinCameraActivity : AppCompatActivity() {
             SavitAuthenticatorTheme {
                 val listOfScreens = listOf(Screens.QRScreen,Screens.EditScreen)
                 val navController = rememberNavController()
-
+                val viewmodel = getViewModel<PinCameraViewmodel>()
                 val isPermissionGranted by model.isGranted.observeAsState()
                 val isDark = isSystemInDarkTheme()
                 Scaffold(
@@ -145,7 +146,7 @@ class PinCameraActivity : AppCompatActivity() {
                     if (isPermissionGranted != null && isPermissionGranted == true){
                         NavHost(navController, startDestination = Screens.QRScreen.route) {
                             composable(Screens.QRScreen.route) { MainQRScreen() }
-                            composable(Screens.EditScreen.route) { EditScreen() }
+                            composable(Screens.EditScreen.route) { EditScreen(viewmodel) }
                         }
                     }else if(isPermissionGranted != null && isPermissionGranted == false){
                         AlertDialog(

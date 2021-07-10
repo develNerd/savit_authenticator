@@ -37,6 +37,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import org.koin.android.ext.android.inject
 import org.koin.androidx.compose.getViewModel
 import org.savit.savitauthenticator.R
 import org.savit.savitauthenticator.ui.dashboard.viewmodel.DashboardViewModel
@@ -49,12 +50,12 @@ class DashboardActivity : AppCompatActivity() {
     private lateinit var executor: Executor
     private lateinit var biometricPrompt: BiometricPrompt
     private lateinit var promptInfo: BiometricPrompt.PromptInfo
+    private val viewModel by inject<DashboardViewModel>()
     @ExperimentalFoundationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val viewModel = getViewModel<DashboardViewModel>()
 
             var errorMessage by remember {
                 mutableStateOf("")
@@ -91,94 +92,105 @@ class DashboardActivity : AppCompatActivity() {
                 .build()
 
 
+
             SavitAuthenticatorTheme {
                val isFingerprint by viewModel.isFingerPrint.observeAsState()
                val listOfScreens = listOf(DashboardScreens.DashboardScreen, DashboardScreens.PrefenenceScreen)
                val navController = rememberNavController()
                val isDark = isSystemInDarkTheme()
-               var expanded by remember {
+               var isLoaded by remember {
                    mutableStateOf(false)
                }
 
-               if (isFingerprint != null){
-                   if (!isFingerprint!!){
-                       setAuthenticated(true)
-                   } 
+                if (isFingerprint != null && !isFingerprint!! && !isLoaded)
+                {
+                    Dash()
+                }
+                else if(!isAuthenticated && isFingerprint != null && isFingerprint!!){
+                    biometricPrompt.authenticate(promptInfo)
+                    FingerPrintScreen()
+                }else if(isAuthenticated && isFingerprint !=null && isFingerprint!!){
+                    Dash()
+                }
+            }
 
-                   if (isAuthenticated){
-                       Scaffold(
-                           topBar = {
-                               BoxWithConstraints(modifier = Modifier
-                                   .fillMaxWidth()
-                                   .background(color = if (isDark) Green500 else Green201)) {
-                                   Row(modifier = Modifier.padding(start =  10.dp,end = 20.dp,top = 10.dp,bottom = 10.dp),verticalAlignment = Alignment.CenterVertically) {
-                                       Image(painter = painterResource(id = R.drawable.logo_vector), contentDescription = "logoTopAppBar",modifier = Modifier
-                                           .size(36.dp)
-                                           .padding(start = 3.dp, end = 10.dp))
-                                       Text(text = "Savit Authenticator",fontSize = 16.sp,fontWeight = FontWeight.Bold,fontStyle = FontStyle.Italic)
-                                   }
-                                   val menuItems = listOf("Add Account")
-                                   IconButton(onClick = { expanded = !expanded },modifier = Modifier.align(
-                                       Alignment.CenterEnd)) {
-                                       Icon(Icons.Default.MoreVert, contentDescription = "menuIconButton",)
-                                   }
-                                   DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false},offset = DpOffset(this.maxWidth,0.dp),modifier = Modifier.align(
-                                       Alignment.CenterEnd)) {
-                                       menuItems.forEach {
-                                           DropdownMenuItem(onClick = {
-                                               if (it.lowercase(Locale.getDefault()).contains("account")){
-                                                   startActivity(Intent(this@DashboardActivity,PinCameraActivity::class.java))
-                                                   expanded = false
-                                               }
-                                           },modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                                               Text(text = it)
-                                           }
-                                       }
-                                   }
-                               }
-                           },
-                           bottomBar = {
-                               BottomAppBar(modifier = Modifier.fillMaxWidth(),contentPadding = PaddingValues(top = 5.dp,bottom = 5.dp),backgroundColor =if (isDark) Green500 else Green201,contentColor = if (isDark) Green201 else Green500) {
-                                   val navBackStackEntry by navController.currentBackStackEntryAsState()
-                                   val currentRoute = navBackStackEntry?.destination
-                                   listOfScreens.forEach {screen ->
-                                       BottomNavigationItem(
-                                           icon = { screen.drawableResource() },
-                                           label = { Text(stringResource(screen.resourceId)) },
-                                           selected = currentRoute?.hierarchy?.any { it.route == screen.route } == true,
-                                           onClick = {
-                                               navController.navigate(screen.route) {
-
-                                                   popUpTo(navController.graph.findStartDestination().id) {
-                                                       saveState = true
-                                                   }
-                                                   // reselecting the same item
-                                                   launchSingleTop = true
-                                                   // Restore state when reselecting a previously selected item
-                                                   restoreState = true
-                                               }
-                                           }
-                                       )
-                                   }
-                               }
-                           })
-                       {
-                           NavHost(navController, startDestination = DashboardScreens.DashboardScreen.route) {
-                               composable(DashboardScreens.DashboardScreen.route) { DashboardScreen() }
-                               composable(DashboardScreens.PrefenenceScreen.route) { PreferenceScreen(this@DashboardActivity) }
-                           }
-                       }
-                   }else if(!isAuthenticated && isFingerprint!!){
-                       biometricPrompt.authenticate(promptInfo)
-                       FingerPrintScreen()
-                   }
-               }
-
-
-
-
-           }
        }
+
+
+    }
+
+    @ExperimentalFoundationApi
+    @Composable
+    fun Dash(){
+        val isFingerprint by viewModel.isFingerPrint.observeAsState()
+        val listOfScreens = listOf(DashboardScreens.DashboardScreen, DashboardScreens.PrefenenceScreen)
+        val navController = rememberNavController()
+        val isDark = isSystemInDarkTheme()
+        var expanded by remember {
+            mutableStateOf(false)
+        }
+        Scaffold(
+            topBar = {
+                BoxWithConstraints(modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color = if (isDark) Green500 else Green201)) {
+                    Row(modifier = Modifier.padding(start =  10.dp,end = 20.dp,top = 10.dp,bottom = 10.dp),verticalAlignment = Alignment.CenterVertically) {
+                        Image(painter = painterResource(id = R.drawable.logo_vector), contentDescription = "logoTopAppBar",modifier = Modifier
+                            .size(36.dp)
+                            .padding(start = 3.dp, end = 10.dp))
+                        Text(text = "Savit Authenticator",fontSize = 16.sp,fontWeight = FontWeight.Bold,fontStyle = FontStyle.Italic)
+                    }
+                    val menuItems = listOf("Add Account")
+                    IconButton(onClick = { expanded = !expanded },modifier = Modifier.align(
+                        Alignment.CenterEnd)) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "menuIconButton",)
+                    }
+                    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false},offset = DpOffset(this.maxWidth,0.dp),modifier = Modifier.align(
+                        Alignment.CenterEnd)) {
+                        menuItems.forEach {
+                            DropdownMenuItem(onClick = {
+                                if (it.lowercase(Locale.getDefault()).contains("account")){
+                                    startActivity(Intent(this@DashboardActivity,PinCameraActivity::class.java))
+                                    expanded = false
+                                }
+                            },modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                                Text(text = it)
+                            }
+                        }
+                    }
+                }
+            },
+            bottomBar = {
+                BottomAppBar(modifier = Modifier.fillMaxWidth(),contentPadding = PaddingValues(top = 5.dp,bottom = 5.dp),backgroundColor =if (isDark) Green500 else Green201,contentColor = if (isDark) Green201 else Green500) {
+                    val navBackStackEntry by navController.currentBackStackEntryAsState()
+                    val currentRoute = navBackStackEntry?.destination
+                    listOfScreens.forEach {screen ->
+                        BottomNavigationItem(
+                            icon = { screen.drawableResource() },
+                            label = { Text(stringResource(screen.resourceId)) },
+                            selected = currentRoute?.hierarchy?.any { it.route == screen.route } == true,
+                            onClick = {
+                                navController.navigate(screen.route) {
+
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    // reselecting the same item
+                                    launchSingleTop = true
+                                    // Restore state when reselecting a previously selected item
+                                    restoreState = true
+                                }
+                            }
+                        )
+                    }
+                }
+            })
+        {
+            NavHost(navController, startDestination = DashboardScreens.DashboardScreen.route) {
+                composable(DashboardScreens.DashboardScreen.route) { DashboardScreen(viewModel) }
+                composable(DashboardScreens.PrefenenceScreen.route) { PreferenceScreen(this@DashboardActivity) }
+            }
+        }
     }
     @Composable
     fun FingerPrintScreen(){
@@ -197,8 +209,11 @@ class DashboardActivity : AppCompatActivity() {
                 }
                 Box(modifier = Modifier
                     .fillMaxSize()){
-                    Icon(Icons.Rounded.Fingerprint,tint = Green200, contentDescription = "Fingerprint",modifier = Modifier.size(72.dp).align(
-                        Alignment.Center))
+                    Icon(Icons.Rounded.Fingerprint,tint = Green200, contentDescription = "Fingerprint",modifier = Modifier
+                        .size(72.dp)
+                        .align(
+                            Alignment.Center
+                        ))
                 }
             }
             Column(modifier = Modifier

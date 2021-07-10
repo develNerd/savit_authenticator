@@ -1,18 +1,19 @@
 package org.savit.savitauthenticator.ui.dashboard
 
+import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.Text
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
@@ -21,12 +22,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 import org.savit.savitauthenticator.R
@@ -46,47 +50,98 @@ private val TOTP_COUNTDOWN_REFRESH_PERIOD_MILLIS = 100L
 
 @ExperimentalFoundationApi
 @Composable
-fun DashboardScreen(){
-    val viewModel = getViewModel<DashboardViewModel>()
+fun DashboardScreen(viewModel: DashboardViewModel){
     val isGrid by viewModel.isGrid.observeAsState()
     val userAccounts by viewModel.userAccounts.observeAsState()
+    val setShowDeleteSnackbar by viewModel.showDeleteSnackbar.observeAsState(false)
     val isDark = isSystemInDarkTheme()
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(top = 3.dp,start = 3.dp,end = 3.dp,bottom = 70.dp)) {
-        Card(modifier = Modifier
-            .fillMaxWidth()
-            .padding(7.dp)) {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Text(text = "Accounts",fontWeight = FontWeight.Bold,modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(top = 15.dp, start = 10.dp, bottom = 15.dp))
-                Text(text = if (userAccounts.isNullOrEmpty()) "" else userAccounts!!.size.toString(),fontWeight = FontWeight.Bold,modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .padding(top = 15.dp, end = 10.dp, bottom = 15.dp))
+
+    Box(modifier = Modifier.fillMaxWidth().padding(bottom = 70.dp)) {
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 3.dp, start = 3.dp, end = 3.dp))
+        {
+            Card(modifier = Modifier
+                .fillMaxWidth()
+                .padding(7.dp)) {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    Text(text = "Accounts",fontWeight = FontWeight.Bold,modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .padding(top = 15.dp, start = 10.dp, bottom = 15.dp))
+                    Text(text = if (userAccounts.isNullOrEmpty()) "" else userAccounts!!.size.toString(),fontWeight = FontWeight.Bold,modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(top = 15.dp, end = 10.dp, bottom = 15.dp))
+                }
+            }
+
+            if (isGrid != null){
+                if (!isGrid!! && !userAccounts.isNullOrEmpty()){
+                    LazyColumn(modifier = Modifier.fillMaxHeight()) {
+                        items(userAccounts!!){userAccount ->
+                            RowAccountItem(isDark = isDark,userAccount.name?:"",userAccount.issuer?:"",userAccount.sharedKey,icon = userAccount.image,viewModel)
+                        }
+                    }
+                }else if(isGrid!! && !userAccounts.isNullOrEmpty()){
+                    LazyVerticalGrid(cells = GridCells.Fixed(2)) {
+                        items(userAccounts!!){userAccount ->
+                            GridAccountItem(isDark = isDark,userAccount.name?:"",userAccount.issuer?:"",userAccount.sharedKey,icon = userAccount.image,viewModel)
+                        }
+                    }
+
+                }
             }
         }
 
-        if (isGrid != null){
-            if (!isGrid!! && !userAccounts.isNullOrEmpty()){
-                LazyColumn(modifier = Modifier.fillMaxHeight()) {
-                    items(userAccounts!!){userAccount ->
-                        RowAccountItem(isDark = isDark,userAccount.name?:"",userAccount.issuer?:"",userAccount.sharedKey,icon = userAccount.image)
-                    }
-                }
-            }else if(isGrid!! && !userAccounts.isNullOrEmpty()){
-                LazyVerticalGrid(cells = GridCells.Fixed(2)) {
-                    items(userAccounts!!){userAccount ->
-                        GridAccountItem(isDark = isDark,userAccount.name?:"",userAccount.issuer?:"",userAccount.sharedKey,icon = userAccount.image)
-                    }
-                }
-
+        if (setShowDeleteSnackbar){
+            ShwDeleteSnackBar(modifier = Modifier.align(Alignment.BottomCenter)) {
+                viewModel.setShowDeleteSnackBar(it)
             }
         }
     }
 
+
+
+
 }
+
+
+fun deleteAccount(sharedKey:String,viewModel: DashboardViewModel){
+    viewModel.setShowDeleteSnackBar(true)
+
+    Handler(Looper.getMainLooper())
+        .postDelayed({
+            val delete = viewModel.showDeleteSnackbar.value?:false
+                     if (delete){
+                         viewModel.deleteAccount(sharedKey)
+                     }
+        },3000)
+}
+
+@Composable
+fun ShwDeleteSnackBar(modifier: Modifier = Modifier,setShowSnackBar:(Boolean) -> Unit){
+
+    Box(modifier = modifier
+        .height(80.dp)
+        .fillMaxWidth()
+        .padding(15.dp)
+        .background(shape = RoundedCornerShape(3.dp), color = darkBg)) {
+        Row(modifier = modifier.fillMaxSize(),verticalAlignment = Alignment.CenterVertically) {
+            Box(modifier = Modifier
+                .fillMaxHeight()
+                .background(
+                    color = red,
+                    shape = RoundedCornerShape(topStart = 3.dp, bottomStart = 3.dp)
+                )
+                .width(3.dp))
+            Text(text = "Account Deleted",modifier = Modifier.padding(start = 10.dp,end = 5.dp),color = textColorDark,fontSize = 16.sp)
+        }
+        TextButton(onClick = { setShowSnackBar(false) },modifier = Modifier.align(Alignment.CenterEnd)) {
+            Text(text = "Undo",modifier = Modifier.padding(5.dp),color = Green500,fontSize = 16.sp)
+        }
+    }
+}
+
 
 @Preview(showBackground = true)
 @Composable
@@ -96,19 +151,26 @@ fun RowAccountItemPreview(){
             .padding(7.dp)
             .fillMaxWidth()
             .background(color = UserAccountBg, shape = RoundedCornerShape(10))) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Row(modifier = Modifier
+                    .wrapContentWidth()
+                    .padding(end = 71.dp),verticalAlignment = Alignment.CenterVertically) {
+                    Image(painter = painterResource(id = R.drawable.slack), contentDescription = "",modifier = Modifier
+                        .padding(top = 15.dp, bottom = 15.dp, start = 10.dp, end = 10.dp)
+                        .size(48.dp))
+                    Column(verticalArrangement = Arrangement.Center,modifier = Modifier
+                        .wrapContentSize()
+                        .padding(top = 10.dp, bottom = 10.dp)) {
+                        Text(text = "Slack",fontWeight = FontWeight.Bold,fontSize = 14.sp)
+                        Text(text = "isaackakpo4@gmail.com",fontWeight = FontWeight.SemiBold,fontSize = 14.sp,modifier = Modifier.padding(top = 6.dp))
+                        Text(text = "908765",fontWeight = FontWeight.Bold,fontSize = 18.sp,modifier = Modifier.padding(top = 6.dp))
 
-            Row(modifier = Modifier.wrapContentWidth(),verticalAlignment = Alignment.CenterVertically) {
-                Image(painter = painterResource(id = R.drawable.slack), contentDescription = "",modifier = Modifier
-                    .padding(top = 15.dp, bottom = 15.dp, start = 10.dp, end = 10.dp)
-                    .size(48.dp))
-                Column(verticalArrangement = Arrangement.Center,modifier = Modifier
-                    .wrapContentSize()
-                    .padding(top = 10.dp, bottom = 10.dp)) {
-                    Text(text = "Slack",fontWeight = FontWeight.Bold,fontSize = 14.sp)
-                    Text(text = "isaackakpo4@gmail.com",fontWeight = FontWeight.SemiBold,fontSize = 14.sp,modifier = Modifier.padding(top = 6.dp))
-                    Text(text = "908765",fontWeight = FontWeight.Bold,fontSize = 18.sp,modifier = Modifier.padding(top = 6.dp))
-
+                    }
                 }
+                IconButton(onClick = { /*TODO*/ },modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                    Icon(Icons.Rounded.MoreHoriz, contentDescription = "")
+                }
+
             }
 
             Box(modifier = Modifier
@@ -117,8 +179,6 @@ fun RowAccountItemPreview(){
                 .padding(end = 5.dp)) {
                 CustomProgressBar(progressMutiplyingFactor = 1F,"")
             }
-
-
         }
     }
 
@@ -126,7 +186,7 @@ fun RowAccountItemPreview(){
 
 
 @Composable
-fun RowAccountItem(isDark:Boolean,name:String,issuer:String,key:String,icon:Int){
+fun RowAccountItem(isDark:Boolean,name:String,issuer:String,key:String,icon:Int,viewModel: DashboardViewModel){
     var totpCountdownTask: TotpCountdownTask? = null
     var totpCounter: TotpCounter
     var otpProvider: OtpProvider
@@ -177,10 +237,19 @@ fun RowAccountItem(isDark:Boolean,name:String,issuer:String,key:String,icon:Int)
 
     val lastcolor = if (isDark) myGreen else Green500
 
+    val (showDeleteDialog,setShowDeleteDialog) = remember {
+        mutableStateOf(false)
+    }
+
+
+
     SavitAuthenticatorTheme() {
         Box(modifier = Modifier
             .padding(7.dp)
             .fillMaxWidth()
+            .clickable {
+                setShowDeleteDialog(true)
+            }
             .background(
                 color = if (isDark) GreenTrans200 else UserAccountBg,
                 shape = RoundedCornerShape(8)
@@ -192,8 +261,8 @@ fun RowAccountItem(isDark:Boolean,name:String,issuer:String,key:String,icon:Int)
                 Column(verticalArrangement = Arrangement.Center,modifier = Modifier
                     .wrapContentSize()
                     .padding(top = 10.dp, bottom = 10.dp)) {
-                    Text(text = issuer,fontWeight = FontWeight.Bold,fontSize = 14.sp)
-                    Text(text = realName,fontWeight = FontWeight.SemiBold,fontSize = 14.sp,modifier = Modifier.padding(top = 6.dp))
+                    Text(text = issuer?:"-",fontWeight = FontWeight.Bold,fontSize = 14.sp)
+                    Text(text = realName?:"-",fontWeight = FontWeight.SemiBold,fontSize = 14.sp,modifier = Modifier.padding(top = 6.dp))
                     Text(text = pin?:"",fontWeight = FontWeight.Bold,fontSize = 18.sp,modifier = Modifier.padding(top = 6.dp),color =  if (progress <= 0.33) red else if (progress <= 0.66) lightblue else lastcolor)
                 }
             }
@@ -209,11 +278,39 @@ fun RowAccountItem(isDark:Boolean,name:String,issuer:String,key:String,icon:Int)
         }
     }
 
+
+
+    if (showDeleteDialog){
+        AlertDialog(
+            title = {
+                Text(text = "Delete Account $realName",modifier = Modifier.fillMaxWidth(),textAlign = TextAlign.Center)
+            },
+            text = {
+                Text(text = "You are about to delete account for $issuer:$realName",modifier = Modifier.fillMaxWidth(),textAlign = TextAlign.Center)
+            },onDismissRequest = {
+                setShowDeleteDialog(false)
+            },
+            properties = DialogProperties(true, dismissOnClickOutside = true),
+            confirmButton = {
+                TextButton(onClick = {
+                    deleteAccount(key,viewModel)
+                    setShowDeleteDialog(false)
+                }) {
+                    Text(text = "Delete",color = red)
+                }
+            },dismissButton = {
+                TextButton(onClick = {
+                    setShowDeleteDialog(false)
+                }) {
+                    Text(text = "Cancel",color = if (!isDark) Green500 else Green201)
+                }
+            },modifier = Modifier.padding(15.dp))
+    }
 }
 
 
 @Composable
-fun GridAccountItem(isDark:Boolean,name:String,issuer:String,key:String,icon:Int){
+fun GridAccountItem(isDark:Boolean,name:String,issuer:String,key:String,icon:Int,viewModel: DashboardViewModel){
     var totpCountdownTask: TotpCountdownTask? = null
     val totpCounter: TotpCounter
     val otpProvider: OtpProvider
@@ -222,6 +319,8 @@ fun GridAccountItem(isDark:Boolean,name:String,issuer:String,key:String,icon:Int
     totpCounter = TotpCounter(DEFAULT_INTERVAL.toLong())
     totpCountdownTask = TotpCountdownTask(totpCounter,TOTP_COUNTDOWN_REFRESH_PERIOD_MILLIS)
     otpProvider = OtpProvider(key,timeService)
+
+
     var progress by remember {
         mutableStateOf(1F)
     }
@@ -263,6 +362,11 @@ fun GridAccountItem(isDark:Boolean,name:String,issuer:String,key:String,icon:Int
     totpCountdownTask!!.startAndNotifyListener()
 
     val lastcolor = if (isDark) myGreen else Green500
+
+    val (showDeleteDialog,setShowDeleteDialog) = remember {
+        mutableStateOf(false)
+    }
+
     SavitAuthenticatorTheme() {
         Column(modifier = Modifier
             .fillMaxWidth()
@@ -276,7 +380,11 @@ fun GridAccountItem(isDark:Boolean,name:String,issuer:String,key:String,icon:Int
                     color = if (isDark) GreenTrans200 else UserAccountBg,
                     shape = RoundedCornerShape(8)
                 )
-                .wrapContentHeight()) {
+                .clickable {
+                    setShowDeleteDialog(true)
+                }
+                .wrapContentHeight())
+            {
                 Column(verticalArrangement = Arrangement.Center,horizontalAlignment = Alignment.CenterHorizontally,modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 10.dp, bottom = 10.dp)) {
@@ -299,10 +407,38 @@ fun GridAccountItem(isDark:Boolean,name:String,issuer:String,key:String,icon:Int
                         .padding(top = 5.dp)) {
                         CustomProgressBar(progressMutiplyingFactor = progress,secondsRemaining)
                     }
+
                 }
             }
+
         }
     }
+    if (showDeleteDialog){
+        AlertDialog(
+            title = {
+                Text(text = "Delete Account $realName",modifier = Modifier.fillMaxWidth(),textAlign = TextAlign.Center)
+            },
+            text = {
+                Text(text = "You are about to delete account for $issuer:$realName",modifier = Modifier.fillMaxWidth(),textAlign = TextAlign.Center)
+            },onDismissRequest = {
+
+            },
+            properties = DialogProperties(true, dismissOnClickOutside = true),
+            confirmButton = {
+                TextButton(onClick = {
+                    deleteAccount(key,viewModel = viewModel)
+                }) {
+                    Text(text = "Delete",color = red)
+                }
+            },dismissButton = {
+                TextButton(onClick = {
+                    setShowDeleteDialog(false)
+                }) {
+                    Text(text = "Cancel",color = if (!isDark) Green500 else Green201)
+                }
+            },modifier = Modifier.padding(15.dp))
+    }
+
 }
 
 @Preview(showBackground = true)
@@ -338,11 +474,6 @@ fun GridAccountItemP(){
                         .align(
                             Alignment.CenterHorizontally
                         )
-
-
-
-
-
                         ,textAlign = TextAlign.Center)
 
                     Box(modifier = Modifier

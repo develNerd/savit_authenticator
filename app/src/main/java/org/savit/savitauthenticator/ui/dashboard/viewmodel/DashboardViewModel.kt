@@ -148,6 +148,20 @@ class DashboardViewModel(private val encryptedDatabase: EncryptedDatabase, priva
         }
     }
 
+    private val _showDeleteSnackbar = MutableLiveData<Boolean>()
+    val showDeleteSnackbar: LiveData<Boolean>
+        get() = _showDeleteSnackbar
+
+    fun setShowDeleteSnackBar(value: Boolean){
+        _showDeleteSnackbar.value = value
+    }
+
+    fun deleteAccount(sharedKey:String){
+        viewModelScope.launch {
+            encryptedDatabase.getUSerAccountDao().deleteAccount(sharedKey = sharedKey)
+        }
+    }
+
     fun resetTimeSync(){
         viewModelScope.launch {
             _isTimeSync.value = false

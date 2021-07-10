@@ -6,6 +6,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
@@ -364,9 +365,6 @@ fun CustomProgressBar(progressMutiplyingFactor:Float,secondsRemaining:String){
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         Canvas(modifier = Modifier
             .fillMaxSize()
-            .clickable {
-
-            }
             .padding(5.dp))
         {
 
@@ -464,4 +462,21 @@ fun Loader() {
 
     }
 
+}
+
+
+@Composable
+fun InputField(inputFieldValue:String,inputFieldHint:String,onInputValueChange:(String) -> Unit){
+
+    Column(modifier = Modifier.padding(10.dp)) {
+        OutlinedTextField(
+            maxLines = 1,
+            value = inputFieldValue,
+            onValueChange = onInputValueChange,
+            label = { Text(text = inputFieldHint) },modifier = Modifier.fillMaxWidth(),
+
+            )
+        Spacer(modifier = Modifier.height(5.dp))
+
+    }
 }

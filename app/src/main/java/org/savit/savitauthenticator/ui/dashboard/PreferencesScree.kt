@@ -64,10 +64,13 @@ fun PreferenceScreen(activity: DashboardActivity){
     val (openDialog,showDialog) = remember {
         mutableStateOf(false)
     }
+    val isDark = isSystemInDarkTheme()
     var errorMessage by remember {
         mutableStateOf("")
     }
-
+    val (reSet,setReSet) = remember {
+        mutableStateOf(false)
+    }
     executor = ContextCompat.getMainExecutor(context)
     biometricPrompt = BiometricPrompt(activity, executor,
         object : BiometricPrompt.AuthenticationCallback() {
@@ -75,17 +78,20 @@ fun PreferenceScreen(activity: DashboardActivity){
                                                errString: CharSequence) {
                 super.onAuthenticationError(errorCode, errString)
                errorMessage = "Something Went Wrong"
+                setReSet(true)
             }
 
             override fun onAuthenticationSucceeded(
                 result: BiometricPrompt.AuthenticationResult) {
                 super.onAuthenticationSucceeded(result)
               viewModel.saveIsFingerPrint(true)
+                setReSet(false)
             }
 
             override fun onAuthenticationFailed() {
                 super.onAuthenticationFailed()
                 errorMessage = "Something Went Wrong"
+                setReSet(true)
             }
         })
 
@@ -109,7 +115,7 @@ fun PreferenceScreen(activity: DashboardActivity){
 
             if (hasFingerprint != null && hasFingerprint!!){
                 if (isFingerprint != null){
-                    PreferenceItem(icon = Icons.Rounded.Fingerprint,isDefCheck = isFingerprint!!, text = "Fingerprint"){
+                    FingerprintPreferenceItem(icon = Icons.Rounded.Fingerprint,isDefCheck = isFingerprint!!, text = "Fingerprint",reset = reSet){
                         if (it){
                             if (checkIfFingerprintAvailable(context).second == null){
                                 biometricPrompt.authenticate(promptInfo)
@@ -182,11 +188,11 @@ fun PreferenceScreen(activity: DashboardActivity){
                                     setReset(false)
                                 }
                             }) {
-                                Text(text = "Okay")
+                                Text(text = "Okay",color = if (!isDark) Green500 else Green201)
                             }
-                        })
+                        },modifier = Modifier.padding(15.dp))
                 }
-                else if (timeCorrectionMinutes != null && isLoading == false && error != ""){
+                else if (isLoading == false && error != ""){
                     AlertDialog(
                         title = {
                             Text(text = "Time Sync",modifier = Modifier.fillMaxWidth(),textAlign = TextAlign.Center)
@@ -203,9 +209,9 @@ fun PreferenceScreen(activity: DashboardActivity){
                                 setChecked(false)
                                 setReset(true)
                             }) {
-                                Text(text = "Dissmiss")
+                                Text(text = "Dismiss",color =  if (!isDark) Green500 else Green201)
                             }
-                        })
+                        },modifier = Modifier.padding(15.dp))
                 }
             }
 
@@ -219,6 +225,43 @@ fun PreferenceScreen(activity: DashboardActivity){
     }
 
 
+}
+
+@Composable
+fun FingerprintPreferenceItem(icon: ImageVector,isDefCheck:Boolean,text:String,reset: Boolean,onclick:(Boolean) -> Unit){
+
+    val isDark = isSystemInDarkTheme()
+    val (isChecked,setChecked) = remember {
+        mutableStateOf(isDefCheck)
+    }
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .padding(7.dp)
+        .wrapContentHeight()
+        .background(
+            color = if (isDark) GreenTrans200 else UserAccountBg,
+            shape = RoundedCornerShape(10)
+        )) {
+        val color = if (isDark) Green201 else radioBg
+
+        Row(modifier = Modifier
+            .padding(10.dp)
+            .align(Alignment.CenterStart),verticalAlignment = Alignment.CenterVertically) {
+            Icon(icon, contentDescription = "",modifier = Modifier.padding(end = 20.dp),tint = Green500)
+            Text(text = text)
+        }
+
+        Box(modifier = Modifier
+            .size(55.dp)
+            .padding(end = 3.dp)
+            .align(Alignment.CenterEnd)) {
+            CustomTimeSwitch(color,isChecked,reset){ischecked ->
+                setChecked(ischecked)
+                onclick(ischecked)
+            }
+        }
+
+    }
 }
 
 @Composable
@@ -289,7 +332,9 @@ fun TimeSyncPreferenceItem(icon: ImageVector,isChecked:Boolean,setChecked:(Boole
                     Column(verticalArrangement = Arrangement.Center,modifier = Modifier
                         .fillMaxHeight()
                         .align(Alignment.Center)) {
-                       CircularProgressIndicator(modifier = Modifier.size(24.dp).align(Alignment.CenterHorizontally),strokeWidth = 1.5.dp)
+                       CircularProgressIndicator(modifier = Modifier
+                           .size(24.dp)
+                           .align(Alignment.CenterHorizontally),strokeWidth = 1.5.dp)
                     }
                 }else{
                     CustomTimeSwitch(color,isChecked,reset){ischecked ->
