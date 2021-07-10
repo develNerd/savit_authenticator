@@ -35,8 +35,7 @@ pipeline {
         // Compile the app and its dependencies
         sh './gradlew assemble${BUILD_TYPE}'
         sh './gradlew assemble${BUILD_TYPE}AndroidTest'
-        sh './gradlew assemble
-
+        sh './gradlew assemble'
       }
     }
 
@@ -44,7 +43,6 @@ pipeline {
       steps {
         // Compile the app and its dependencies
         sh './gradlew test'
-       
       }
     }
 
