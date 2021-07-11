@@ -30,7 +30,6 @@ import java.security.SecureRandom
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 
-@RunWith(AndroidJUnit4::class)
 class DashboardViewModelTest {
     /*
     private lateinit var encryptedDatabase: EncryptedDatabase
