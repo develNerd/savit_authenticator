@@ -32,6 +32,7 @@ import javax.crypto.SecretKey
 
 @RunWith(AndroidJUnit4::class)
 class DashboardViewModelTest {
+    /*
     private lateinit var encryptedDatabase: EncryptedDatabase
     private lateinit var viewModel: DashboardViewModel
     private lateinit var keyService: KeyService
@@ -53,7 +54,7 @@ class DashboardViewModelTest {
         networkConnectionInterceptor = NetworkConnectionInterceptor(context)
         ktorClient = KtorClient(networkConnectionInterceptor = networkConnectionInterceptor)
         viewModel = DashboardViewModel(encryptedDatabase,preferenceProvider,dataStore,ktorClient)
-    }
+    }*/
 
   /*  @Test
     fun saveIsFingerPrint() {
@@ -90,6 +91,7 @@ class DashboardViewModelTest {
    */
 
 
+    /*
 
     @After
     @Throws(IOException::class)
@@ -125,6 +127,6 @@ class DashboardViewModelTest {
         }
 
         return key.toString()
-    }
+    } */
 
 }

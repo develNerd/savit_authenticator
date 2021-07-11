@@ -137,7 +137,7 @@ fun ShwDeleteSnackBar(modifier: Modifier = Modifier,setShowSnackBar:(Boolean) ->
             Text(text = "Account Deleted",modifier = Modifier.padding(start = 10.dp,end = 5.dp),color = textColorDark,fontSize = 16.sp)
         }
         TextButton(onClick = { setShowSnackBar(false) },modifier = Modifier.align(Alignment.CenterEnd)) {
-            Text(text = "Undo",modifier = Modifier.padding(5.dp),color = Green500,fontSize = 16.sp)
+            Text(text = "Undo",modifier = Modifier.padding(5.dp),color = Green200,fontSize = 16.sp)
         }
     }
 }
@@ -427,6 +427,7 @@ fun GridAccountItem(isDark:Boolean,name:String,issuer:String,key:String,icon:Int
             confirmButton = {
                 TextButton(onClick = {
                     deleteAccount(key,viewModel = viewModel)
+                    setShowDeleteDialog(false)
                 }) {
                     Text(text = "Delete",color = red)
                 }
