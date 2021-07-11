@@ -11,7 +11,7 @@ import org.savit.savitauthenticator.model.useraccounts.UserAccountDao
 import org.savit.savitauthenticator.utils.PreferenceProvider
 
 @Database(
-    entities = [UserAccount::class], version = 1
+    entities = [UserAccount::class], version = 1,exportSchema = false
 )
 abstract class EncryptedDatabase : RoomDatabase() {
     abstract fun getUSerAccountDao(): UserAccountDao
