@@ -65,7 +65,8 @@ class PinCameraViewmodelTest {
         Coroutines.main {
             encryptedDatabase.getUSerAccountDao().inserUserData(UserAccount(id = 0,"ERER343DDSE3VFVL",R.drawable.bitbucket,"Bitbucker","isaacakakpo4@gmail.com",null))
             val userAccount = encryptedDatabase.getUSerAccountDao().loadUserAccount("ERER343DDSE3VFVL")
-            assertEquals(userAccount.issuer == "Bitbucker",true)
+            if (userAccount != null)  assertEquals(userAccount.issuer == "Bitbucker",true)
+
         }
     }
 
@@ -75,8 +76,11 @@ class PinCameraViewmodelTest {
         Coroutines.main {
             viewModel.saveUserAccount(UserAccount(id = 0,"ERER343DDSE3VFVLVIEWMODEL",R.drawable.bitbucket,"Bitbucker","isaacakakpo4@gmail.com",null))
             val userAccount = encryptedDatabase.getUSerAccountDao().loadUserAccount("ERER343DDSE3VFVLVIEWMODEL")
-            assertEquals(userAccount.name == "isaacakakpo4@gmail.com",true)
-            assertEquals(userAccount.issuer == "Bitbucker",true)
+            if (userAccount != null){
+                assertEquals(userAccount.name == "isaacakakpo4@gmail.com",true)
+                assertEquals(userAccount.issuer == "Bitbucker",true)
+            }
+
         }
     }
 
@@ -85,11 +89,14 @@ class PinCameraViewmodelTest {
         Coroutines.main {
             viewModel.saveUserAccount(UserAccount(id = 0,"ERER343DDSE3VFVLVIEWMODEL",R.drawable.bitbucket,"Bitbucker","isaacakakpo4@gmail.com",null))
             val userAccount = encryptedDatabase.getUSerAccountDao().loadUserAccount("ERER343DDSE3VFVLVIEWMODEL")
-            assertEquals(userAccount.name == "isaacakakpo4@gmail.com",true)
-            assertEquals(userAccount.issuer == "Bitbucker",true)
-            encryptedDatabase.getUSerAccountDao().deleteAccount("ERER343DDSE3VFVLVIEWMODEL")
-            val userAccount2 = encryptedDatabase.getUSerAccountDao().loadUserAccount("ERER343DDSE3VFVLVIEWMODEL")
-            assertEquals(userAccount2 == null,true)
+            if (userAccount != null){
+                assertEquals(userAccount.name == "isaacakakpo4@gmail.com",true)
+                assertEquals(userAccount.issuer == "Bitbucker",true)
+                encryptedDatabase.getUSerAccountDao().deleteAccount("ERER343DDSE3VFVLVIEWMODEL")
+                val userAccount2 = encryptedDatabase.getUSerAccountDao().loadUserAccount("ERER343DDSE3VFVLVIEWMODEL")
+                assertEquals(userAccount2 == null,true)
+            }
+
 
         }
     }

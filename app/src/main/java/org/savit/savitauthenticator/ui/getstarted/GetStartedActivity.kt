@@ -51,6 +51,12 @@ import org.savit.savitauthenticator.ui.genericviews.PinCameraActivity
 import org.savit.savitauthenticator.ui.theme.*
 import org.savit.savitauthenticator.utils.Coroutines
 import org.savit.savitauthenticator.utils.SavitDataStore
+import java.io.InputStreamReader
+
+import java.io.BufferedReader
+
+
+
 
 class GetStartedActivity : AppCompatActivity() {
 
@@ -346,6 +352,19 @@ class GetStartedActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    private fun checkRootMethod3(): Boolean {
+        var process: Process? = null
+        return try {
+            process = Runtime.getRuntime().exec(arrayOf("/system/xbin/which", "su"))
+            val `in` = BufferedReader(InputStreamReader(process.inputStream))
+            if (`in`.readLine() != null) true else false
+        } catch (t: Throwable) {
+            false
+        } finally {
+            process?.destroy()
+        }
     }
 
     private fun checkIfFingerprintAvailable():Pair<Boolean,String?>{
