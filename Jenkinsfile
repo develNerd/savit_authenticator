@@ -35,7 +35,7 @@ pipeline {
         // Compile the app and its dependencies
         sh './gradlew assemble${BUILD_TYPE}'
         sh './gradlew assemble${BUILD_TYPE}AndroidTest'
-        sh './gradle assemble'
+        sh './gradlew assemble'
       }
     }
 
@@ -54,8 +54,7 @@ pipeline {
                 sh '$GCLOUD_PATH/gcloud auth activate-service-account savitauth@savit-authenticator.iam.gserviceaccount.com --key-file=/var/lib/jenkins/savit-authenticator-931940d412a1.json'
                 sh '$GCLOUD_PATH/gcloud config set project savit-authenticator'
                 sh '$GCLOUD_PATH/gcloud firebase test android run --app app/build/outputs/apk/debug/app-debug.apk --test app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk  --device model=Nexus6,version=21,locale=en,orientation=portrait'
-              
-            }
+                 }
 
       }
     } 
