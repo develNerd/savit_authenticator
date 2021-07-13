@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SavitAuthenticator</string>
+    <string name="app_name">Savit Authenticator</string>
     <string name="totpPhrase0">
         Two factor authentication (2FA)  via sms has been deprecated by  NIST and it is appropriate for users to use Time based One Time Password (TOTP) for 2FA.
     </string>
@@ -11,7 +11,7 @@
     </string>
 
     <string name="totpPhrase2">
-        TOTP based systems also help to reduce sms quotas which would have to be sent any time a user authenticates
+       Savit authenticator help secure your user accounts with an offline based One Time Password
     </string>
     <string name="qrcode">Scan QR Code</string>
     <string name="enterkey">Enter Key</string>

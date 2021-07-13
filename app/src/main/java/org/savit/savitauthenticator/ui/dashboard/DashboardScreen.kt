@@ -1,8 +1,10 @@
 package org.savit.savitauthenticator.ui.dashboard
 
 import android.content.Context
+import android.content.Intent
 import android.os.Handler
 import android.os.Looper
+import android.text.style.ParagraphStyle
 import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -13,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
@@ -25,17 +28,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.ContextCompat.startActivity
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 import org.savit.savitauthenticator.R
 import org.savit.savitauthenticator.ui.dashboard.viewmodel.DashboardViewModel
 import org.savit.savitauthenticator.ui.genericviews.CustomProgressBar
+import org.savit.savitauthenticator.ui.genericviews.PinCameraActivity
 import org.savit.savitauthenticator.ui.theme.*
 import org.savit.savitauthenticator.utils.Coroutines
 import org.savit.savitauthenticator.utils.SavitDataStore
@@ -43,6 +49,10 @@ import org.savit.savitauthenticator.utils.TotpCounter
 import org.savit.savitauthenticator.utils.otp.CountDownListener
 import org.savit.savitauthenticator.utils.otp.OtpProvider
 import org.savit.savitauthenticator.utils.otp.TotpCountdownTask
+import android.app.Activity
+
+
+
 
 
 private  val DEFAULT_INTERVAL:Int = 30
@@ -57,40 +67,68 @@ fun DashboardScreen(viewModel: DashboardViewModel){
     val isDark = isSystemInDarkTheme()
 
 
-    Box(modifier = Modifier.fillMaxWidth().padding(bottom = 70.dp)) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .padding(bottom = 70.dp)) {
         Column(modifier = Modifier
             .fillMaxSize()
             .padding(top = 3.dp, start = 3.dp, end = 3.dp))
         {
-            Card(modifier = Modifier
-                .fillMaxWidth()
-                .padding(7.dp)) {
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    Text(text = "Accounts",fontWeight = FontWeight.Bold,modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .padding(top = 15.dp, start = 10.dp, bottom = 15.dp))
-                    Text(text = if (userAccounts.isNullOrEmpty()) "" else userAccounts!!.size.toString(),fontWeight = FontWeight.Bold,modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .padding(top = 15.dp, end = 10.dp, bottom = 15.dp))
+            if (!userAccounts.isNullOrEmpty()){
+                Card(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(7.dp)) {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Text(text = "Accounts",fontWeight = FontWeight.Bold,modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .padding(top = 15.dp, start = 10.dp, bottom = 15.dp))
+                        Text(text = if (userAccounts.isNullOrEmpty()) "" else userAccounts!!.size.toString(),fontWeight = FontWeight.Bold,modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .padding(top = 15.dp, end = 10.dp, bottom = 15.dp))
+                    }
                 }
-            }
 
-            if (isGrid != null){
-                if (!isGrid!! && !userAccounts.isNullOrEmpty()){
-                    LazyColumn(modifier = Modifier.fillMaxHeight()) {
-                        items(userAccounts!!){userAccount ->
-                            RowAccountItem(isDark = isDark,userAccount.name?:"",userAccount.issuer?:"",userAccount.sharedKey,icon = userAccount.image,viewModel)
+                if (isGrid != null){
+                    if (!isGrid!! && !userAccounts.isNullOrEmpty()){
+                        LazyColumn(modifier = Modifier.fillMaxHeight()) {
+                            items(userAccounts!!){userAccount ->
+                                RowAccountItem(isDark = isDark,userAccount.name?:"",userAccount.issuer?:"",userAccount.sharedKey,icon = userAccount.image,viewModel)
+                            }
+                        }
+                    }else if(isGrid!! && !userAccounts.isNullOrEmpty()){
+                        LazyVerticalGrid(cells = GridCells.Fixed(2)) {
+                            items(userAccounts!!){userAccount ->
+                                GridAccountItem(isDark = isDark,userAccount.name?:"",userAccount.issuer?:"",userAccount.sharedKey,icon = userAccount.image,viewModel)
+                            }
+                        }
+
+                    }
+                }
+            }else if (userAccounts != null && userAccounts!!.isEmpty()){
+                val context = LocalContext.current
+                Box(modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 80.dp)) {
+                    Column(modifier = Modifier
+                        .align(Alignment.Center)
+                        .fillMaxSize(),horizontalAlignment = Alignment.CenterHorizontally) {
+                        Image(painter = painterResource(id = R.drawable.intro_pic), contentDescription = "",modifier = Modifier.weight(0.4F))
+                        Spacer(modifier = Modifier.size(10.dp))
+                        Text(text = "No Accounts Added")
+                        Spacer(modifier = Modifier.size(10.dp))
+                        OutlinedButton(onClick = {
+                            val intent = Intent(context as Activity, PinCameraActivity::class.java).setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            (context as Activity).startActivity(intent)
+
+                        }) {
+                            Icon(Icons.Default.Add, contentDescription = "",modifier = Modifier.padding(end = 10.dp))
+                            Text(text = "Add User Account",color = if (isDark) Green201 else Green500)
                         }
                     }
-                }else if(isGrid!! && !userAccounts.isNullOrEmpty()){
-                    LazyVerticalGrid(cells = GridCells.Fixed(2)) {
-                        items(userAccounts!!){userAccount ->
-                            GridAccountItem(isDark = isDark,userAccount.name?:"",userAccount.issuer?:"",userAccount.sharedKey,icon = userAccount.image,viewModel)
-                        }
-                    }
-
                 }
+
             }
+
         }
 
         if (setShowDeleteSnackbar){
@@ -114,6 +152,8 @@ fun deleteAccount(sharedKey:String,viewModel: DashboardViewModel){
             val delete = viewModel.showDeleteSnackbar.value?:false
                      if (delete){
                          viewModel.deleteAccount(sharedKey)
+                         viewModel.setShowDeleteSnackBar(false)
+
                      }
         },3000)
 }
@@ -263,7 +303,7 @@ fun RowAccountItem(isDark:Boolean,name:String,issuer:String,key:String,icon:Int,
                     .padding(top = 10.dp, bottom = 10.dp)) {
                     Text(text = issuer?:"-",fontWeight = FontWeight.Bold,fontSize = 14.sp)
                     Text(text = realName?:"-",fontWeight = FontWeight.SemiBold,fontSize = 14.sp,modifier = Modifier.padding(top = 6.dp))
-                    Text(text = pin?:"",fontWeight = FontWeight.Bold,fontSize = 18.sp,modifier = Modifier.padding(top = 6.dp),color =  if (progress <= 0.33) red else if (progress <= 0.66) lightblue else lastcolor)
+                    Text(text = pin?:"",fontWeight = FontWeight.SemiBold,fontSize = 24.sp,modifier = Modifier.padding(top = 6.dp),color =  if (progress <= 0.33) red else if (progress <= 0.66) lightblue else lastcolor)
                 }
             }
 
@@ -395,7 +435,7 @@ fun GridAccountItem(isDark:Boolean,name:String,issuer:String,key:String,icon:Int
                         .align(
                             Alignment.CenterHorizontally
                         ),textAlign = TextAlign.Center)
-                    Text(text =  pin?:"",fontWeight = FontWeight.Bold,fontSize = 18.sp,modifier = Modifier
+                    Text(text =  pin?:"",fontWeight = FontWeight.SemiBold,fontSize = 24.sp,modifier = Modifier
                         .padding(top = 6.dp)
                         .align(
                             Alignment.CenterHorizontally
@@ -414,6 +454,7 @@ fun GridAccountItem(isDark:Boolean,name:String,issuer:String,key:String,icon:Int
         }
     }
     if (showDeleteDialog){
+
         AlertDialog(
             title = {
                 Text(text = "Delete Account $realName",modifier = Modifier.fillMaxWidth(),textAlign = TextAlign.Center)

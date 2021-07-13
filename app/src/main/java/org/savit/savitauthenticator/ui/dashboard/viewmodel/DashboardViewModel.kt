@@ -55,6 +55,10 @@ class DashboardViewModel(private val encryptedDatabase: EncryptedDatabase, priva
     val isFingerPrint: LiveData<Boolean>
         get() = _isFingerPrint
 
+    private val _isMainFingerPrint = MutableLiveData<Boolean>()
+    val isMainFingerPrint: LiveData<Boolean>
+        get() = _isMainFingerPrint
+
     fun getIFingerPrint(){
         viewModelScope.launch {
             savitDataStore.isHaveFingerPrint.collect {
@@ -71,9 +75,23 @@ class DashboardViewModel(private val encryptedDatabase: EncryptedDatabase, priva
         }
     }
 
+    fun getMainFingerprint(){
+        var isGet = false
+        viewModelScope.launch {
+            savitDataStore.isFingerPrint.collect {
+                if (!isGet){
+                    isGet = true
+                    _isMainFingerPrint.value = it
+                }
+            }
+        }
+    }
+
+
     fun saveIsFingerPrint(value: Boolean){
         viewModelScope.launch {
             savitDataStore.saveIsFingerPrint(value)
+            _isFingerPrint.value = value
         }
     }
 
@@ -87,6 +105,7 @@ class DashboardViewModel(private val encryptedDatabase: EncryptedDatabase, priva
 
 
     init {
+        getMainFingerprint()
         getIFingerPrint()
         getFingerprint()
         getIsGrid()
@@ -128,6 +147,7 @@ class DashboardViewModel(private val encryptedDatabase: EncryptedDatabase, priva
                     }
                     _timeCorrectionMinutes.value = timeInMinutes
                     _isLoading.value = false
+                _isError.value = ""
 
             }catch (e:NoInternetException){
                 _isLoading.value = false

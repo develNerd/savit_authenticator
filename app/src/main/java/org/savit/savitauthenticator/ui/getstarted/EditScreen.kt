@@ -22,9 +22,9 @@ import org.savit.savitauthenticator.ui.theme.textColorDark
 import java.util.*
 
 @Composable
-fun EditScreen(viewModel: PinCameraViewmodel){
+fun EditScreen(){
     val context = LocalContext.current
-
+    val viewModel = getViewModel<PinCameraViewmodel>()
     val name by viewModel.name.observeAsState("")
     val key by viewModel.key.observeAsState("")
     val issuer by viewModel.issuer.observeAsState("")

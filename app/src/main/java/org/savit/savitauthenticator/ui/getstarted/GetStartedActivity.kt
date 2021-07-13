@@ -54,6 +54,10 @@ import org.savit.savitauthenticator.utils.SavitDataStore
 import java.io.InputStreamReader
 
 import java.io.BufferedReader
+import android.net.Uri
+
+
+
 
 
 
@@ -262,7 +266,7 @@ class GetStartedActivity : AppCompatActivity() {
                                                 Text("Dissmiss",fontSize = 14.sp,fontWeight = FontWeight.Bold,color =  if (isDark) textColorDark else Green500)
                                             }
                                         }
-                                    }
+                                    },modifier = Modifier.padding(15.dp)
                                 )
                             }
 
@@ -291,7 +295,7 @@ class GetStartedActivity : AppCompatActivity() {
                 // We attach this *URL* annotation to the following content
                 // until `pop()` is called
                 pushStringAnnotation(tag = "URL",
-                    annotation = "https://developer.android.com")
+                    annotation = "https://www.nist.gov/")
                 withStyle(style = SpanStyle(color = lightblue,
                     fontWeight = FontWeight.Bold,fontSize = 17.sp,textDecoration = TextDecoration.Underline)) {
                     append("  NIST  ")
@@ -312,6 +316,8 @@ class GetStartedActivity : AppCompatActivity() {
                     end = offset)
                     .firstOrNull()?.let { annotation ->
                         // If yes, we log its value
+                        val browse = Intent(Intent.ACTION_VIEW, Uri.parse(annotation.item))
+                        startActivity(browse)
                         Log.d("Clicked URL", annotation.item)
                     }
             }

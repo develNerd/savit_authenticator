@@ -25,7 +25,7 @@ android {
         applicationId "org.savit.savitauthenticator"
         minSdk 21
         targetSdk 30
-        versionCode 1
+        versionCode 6
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -36,7 +36,12 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug{
+            debuggable true
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -91,11 +96,11 @@ dependencies {
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.7.0"
     testImplementation "org.junit.jupiter:junit-jupiter-params:5.7.0"
 
-    // Koin main features for Android (Scope,ViewModel ...)
+    //Koin main features for Android (Scope,ViewModel ...)
     implementation "io.insert-koin:koin-android:$koin_version"
-// Koin for Jetpack WorkManager
+    //Koin for Jetpack WorkManager
     implementation "io.insert-koin:koin-androidx-workmanager:$koin_version"
-// Koin for Jetpack Compose (unstable version)
+    //Koin for Jetpack Compose (unstable version)
     implementation "io.insert-koin:koin-androidx-compose:$koin_version"
 
     // Jetpack Compose Integration for ViewModel
@@ -110,7 +115,7 @@ dependencies {
     implementation 'com.google.mlkit:barcode-scanning:16.2.0'
 
     //Camera x
-    def camerax_version = "1.1.0-alpha06"
+    def camerax_version = "1.0.0"
     // The following line is optional, as the core library is included indirectly by camera-camera2
     implementation "androidx.camera:camera-core:${camerax_version}"
     implementation "androidx.camera:camera-camera2:${camerax_version}"

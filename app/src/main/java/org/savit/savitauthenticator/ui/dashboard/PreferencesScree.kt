@@ -98,7 +98,7 @@ fun PreferenceScreen(activity: DashboardActivity){
     promptInfo = BiometricPrompt.PromptInfo.Builder()
         .setTitle("Savit")
         .setSubtitle("Log in using your biometric credential")
-        .setNegativeButtonText("Use account password")
+        .setNegativeButtonText("Cancel")
         .build()
 
     Box(modifier = Modifier

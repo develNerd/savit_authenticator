@@ -81,37 +81,37 @@ class DashboardActivity : AppCompatActivity() {
 
                     override fun onAuthenticationFailed() {
                         super.onAuthenticationFailed()
-                        errorMessage = "Something Went Wrong "
+                        errorMessage = "Something Went Wrong"
                     }
                 })
 
             promptInfo = BiometricPrompt.PromptInfo.Builder()
-                .setTitle("Biometric login for my app")
+                .setTitle("Savit")
                 .setSubtitle("Log in using your biometric credential")
-                .setNegativeButtonText("Use account password")
+                .setNegativeButtonText("Cancel")
                 .build()
 
+            val isFingerprint by viewModel.isMainFingerPrint.observeAsState()
 
 
             SavitAuthenticatorTheme {
-               val isFingerprint by viewModel.isFingerPrint.observeAsState()
-               val listOfScreens = listOf(DashboardScreens.DashboardScreen, DashboardScreens.PrefenenceScreen)
-               val navController = rememberNavController()
-               val isDark = isSystemInDarkTheme()
-               var isLoaded by remember {
-                   mutableStateOf(false)
-               }
 
-                if (isFingerprint != null && !isFingerprint!! && !isLoaded)
-                {
-                    Dash()
+                if (isFingerprint != null){
+                    if (isAuthenticated  && isFingerprint!!)
+                    {
+                        Dash()
+                    }
+                    else if(!isFingerprint!!){
+                        setAuthenticated(true)
+                        Dash()
+                    }
+                    else if(!isAuthenticated  && isFingerprint!!){
+                        biometricPrompt.authenticate(promptInfo)
+                        FingerPrintScreen()
+                    }
                 }
-                else if(!isAuthenticated && isFingerprint != null && isFingerprint!!){
-                    biometricPrompt.authenticate(promptInfo)
-                    FingerPrintScreen()
-                }else if(isAuthenticated && isFingerprint !=null && isFingerprint!!){
-                    Dash()
-                }
+
+
             }
 
        }
@@ -122,7 +122,6 @@ class DashboardActivity : AppCompatActivity() {
     @ExperimentalFoundationApi
     @Composable
     fun Dash(){
-        val isFingerprint by viewModel.isFingerPrint.observeAsState()
         val listOfScreens = listOf(DashboardScreens.DashboardScreen, DashboardScreens.PrefenenceScreen)
         val navController = rememberNavController()
         val isDark = isSystemInDarkTheme()
@@ -194,6 +193,7 @@ class DashboardActivity : AppCompatActivity() {
     }
     @Composable
     fun FingerPrintScreen(){
+        val isDark = isSystemInDarkTheme()
         Box(modifier = Modifier.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize(),horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(modifier = Modifier
@@ -225,7 +225,7 @@ class DashboardActivity : AppCompatActivity() {
                 OutlinedButton(onClick = {
                     biometricPrompt.authenticate(promptInfo)
                 }) {
-                    Text(text = "Unlock",modifier = Modifier.padding(start = 5.dp, end = 5.dp))
+                    Text(text = "Unlock",modifier = Modifier.padding(start = 5.dp, end = 5.dp),color = if (isDark) Green201 else Green500 )
                 }
             }
    

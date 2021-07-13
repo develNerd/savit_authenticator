@@ -5,6 +5,8 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -77,9 +79,11 @@ class PinCameraActivity : AppCompatActivity() {
             SavitAuthenticatorTheme {
                 val listOfScreens = listOf(Screens.QRScreen,Screens.EditScreen)
                 val navController = rememberNavController()
-                val viewmodel = getViewModel<PinCameraViewmodel>()
                 val isPermissionGranted by model.isGranted.observeAsState()
                 val isDark = isSystemInDarkTheme()
+                Column() {
+
+                }
                 Scaffold(
                     topBar = {
                         Box(modifier = Modifier
@@ -112,19 +116,19 @@ class PinCameraActivity : AppCompatActivity() {
                                         // avoid building up a large stack of destinations
                                         // on the back stack as users select items
                                         popUpTo(navController.graph.findStartDestination().id) {
-                                            saveState = true
+                                            saveState = false
                                         }
                                         // Avoid multiple copies of the same destination when
                                         // reselecting the same item
                                         launchSingleTop = true
                                         // Restore state when reselecting a previously selected item
-                                        restoreState = true
+                                        restoreState = false
                                     }
                                 }
                             )
                         }
                     }
-                })
+                },modifier = Modifier.fillMaxSize())
                 {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         when {
@@ -144,9 +148,10 @@ class PinCameraActivity : AppCompatActivity() {
                         }
                     }
                     if (isPermissionGranted != null && isPermissionGranted == true){
-                        NavHost(navController, startDestination = Screens.QRScreen.route) {
+
+                        NavHost(navController, startDestination = Screens.QRScreen.route,modifier = Modifier.fillMaxSize()) {
                             composable(Screens.QRScreen.route) { MainQRScreen() }
-                            composable(Screens.EditScreen.route) { EditScreen(viewmodel) }
+                            composable(Screens.EditScreen.route) { EditScreen() }
                         }
                     }else if(isPermissionGranted != null && isPermissionGranted == false){
                         AlertDialog(
@@ -191,13 +196,18 @@ sealed class Screens(val route: String, @StringRes val resourceId: Int, val draw
     object QRScreen : Screens ("QRCodeScreen",R.string.qrcode,{
         Icon(
             painter = painterResource(id = R.drawable.qrcode),
-            contentDescription ="",modifier = Modifier.size(24.dp).padding(bottom = 5.dp)
+            contentDescription ="",modifier = Modifier
+                .size(24.dp)
+                .padding(bottom = 5.dp)
         )
     } )
     object EditScreen : Screens ("EnterKeyScreen",R.string.enterkey,{
         Icon(
             painter = painterResource(id = R.drawable.edit),
-            contentDescription ="",modifier = Modifier.size(24.dp).padding(bottom = 5.dp)
+            contentDescription ="",modifier = Modifier
+                .size(24.dp)
+                .padding(bottom = 5.dp)
         )
     })
 }
+
