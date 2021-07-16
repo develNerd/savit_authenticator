@@ -2,7 +2,19 @@ package org.savit.savitauthenticator.utils
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Build
+import android.security.KeyPairGeneratorSpec
+import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys
+import java.math.BigInteger
+import java.security.KeyPair
+import java.security.KeyPairGenerator
+import java.util.*
+import javax.security.auth.x500.X500Principal
+import kotlin.math.abs
+
 
 private const val KEY_SAVED_AT = "token"
 private const val auth_uuid = "auth"
@@ -24,63 +36,55 @@ class PreferenceProvider(
 
     private val appContext = context.applicationContext
 
-    private val preference: SharedPreferences
-        get() = PreferenceManager.getDefaultSharedPreferences(appContext)
+    var masterKeyAlias = createMasterKey(appContext)
 
-
-    fun saveToken(savedAt: String) {
-        preference.edit().putString(
-            KEY_SAVED_AT,
-            savedAt
-        ).apply()
-    }
-
-    fun getToken(): String? {
-        return preference.getString(KEY_SAVED_AT, null)
-    }
+    var preference = EncryptedSharedPreferences.create(
+        "secret_shared_prefs",
+        masterKeyAlias,
+        context,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+    )
 
 
 
 
+    private fun createMasterKey(context: Context): String {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+        } else {
+            val alias = stringFromJNI()
+            val start: Calendar = GregorianCalendar()
+            val end: Calendar = GregorianCalendar()
+            end.add(Calendar.YEAR, 30)
 
+            val spec =
+                KeyPairGeneratorSpec.Builder(context)
+                    .setAlias(alias)
+                    .setSubject(X500Principal("CN=$alias"))
+                    .setSerialNumber(
+                        BigInteger.valueOf(
+                            abs(alias.hashCode()).toLong()
+                        )
+                    )
+                    .setStartDate(start.time).setEndDate(end.time)
+                    .build()
 
-    fun saveIsGrid(savedAt: Boolean) {
-        preference.edit().putBoolean(
-            isGrid,
-            savedAt
-        ).apply()
-    }
-
-    fun getIsGrid(): Boolean {
-        return preference.getBoolean(isGrid, false)
-    }
-
-
-    fun saveAuthID(savedAt: String?) {
-        preference.edit().putString(
-            auth_uuid,
-            savedAt
-        ).apply()
-    }
-
-
-
-
-    fun getAuthID(): String? {
-        return preference.getString(auth_uuid, null)
-    }
-
-    fun saveUserString(savedAt: String?) {
-        preference.edit().putString(
-            user_json,
-            savedAt
-        ).apply()
+            val kpGenerator: KeyPairGenerator = KeyPairGenerator.getInstance(
+                "RSA",
+                "AndroidKeyStore"
+            )
+            kpGenerator.initialize(spec)
+            val kp: KeyPair = kpGenerator.generateKeyPair()
+            kp.public.toString()
+        }
     }
 
 
-    fun getUserString(): String? {
-        return preference.getString(user_json, null)
-    }
+
+
+
+
 
     fun saveisGenerate(savedAt: Boolean?) {
         preference.edit().putBoolean(
@@ -145,5 +149,13 @@ class PreferenceProvider(
         val passcode = preference.getString(fingerprint2, null)
         return passcode?.toCharArray()
     }
+    external fun stringFromJNI(): String
+
+
+    companion object {
+    init {
+        System.loadLibrary("savitauthenticator")
+     }
+   }
 
 }

@@ -37,8 +37,13 @@
         <entry key="../../../../layout/compose-model-1625833641081.xml" value="0.2967479674796748" />
         <entry key="../../../../layout/compose-model-1625841396241.xml" value="0.2967479674796748" />
         <entry key="../../../../layout/compose-model-1626104363668.xml" value="0.45257452574525747" />
+        <entry key="../../../../layout/compose-model-1626280165092.xml" value="0.7859078590785907" />
+        <entry key="../../../../layout/compose-model-1626438331018.xml" value="0.1" />
+        <entry key="../../../../layout/compose-model-1626443563593.xml" value="2.0" />
         <entry key="../../../../layout/custom_preview.xml" value="0.3527777777777778" />
+        <entry key="app/src/main/res/drawable-v24/logo_vector.xml" value="0.3569230769230769" />
         <entry key="app/src/main/res/drawable-v24/logos_paypal.xml" value="0.3569230769230769" />
+        <entry key="app/src/main/res/drawable-v24/splash.xml" value="0.3569230769230769" />
         <entry key="app/src/main/res/drawable/bitbucket.xml" value="0.3569230769230769" />
         <entry key="app/src/main/res/drawable/dashboard.xml" value="0.19692307692307692" />
         <entry key="app/src/main/res/drawable/dd.xml" value="0.3625" />
@@ -47,6 +52,7 @@
         <entry key="app/src/main/res/drawable/google.xml" value="0.3625" />
         <entry key="app/src/main/res/drawable/ic_launcher_foreground.xml" value="0.3569230769230769" />
         <entry key="app/src/main/res/drawable/logo_vector.xml" value="0.3569230769230769" />
+        <entry key="app/src/main/res/drawable/logos_paypal.xml" value="0.3569230769230769" />
         <entry key="app/src/main/res/drawable/microsoft.xml" value="0.3625" />
         <entry key="app/src/main/res/drawable/preferences.xml" value="0.19692307692307692" />
         <entry key="app/src/main/res/drawable/qrcode.xml" value="0.3527777777777778" />

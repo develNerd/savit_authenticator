@@ -79,6 +79,7 @@ class GetStartedActivity : AppCompatActivity() {
                 if (isGranted) {
                     startActivity(Intent(this@GetStartedActivity,PinCameraActivity::class.java))
                 } else {
+
                 }
             }
 
@@ -217,6 +218,8 @@ class GetStartedActivity : AppCompatActivity() {
                                                     Manifest.permission.CAMERA)
                                             }
                                         }
+                                    }else{
+                                        startActivity(Intent(this@GetStartedActivity,PinCameraActivity::class.java))
                                     }
 
 
