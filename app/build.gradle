@@ -22,11 +22,16 @@ android {
         exclude("META-INF/*.kotlin_module")
     }
     ndkVersion '23.0.7530507'
+    externalNativeBuild {
+        cmake {
+            version "3.21.0"
+        }
+    }
     defaultConfig {
         applicationId "org.savit.savitauthenticator"
         minSdk 23
         targetSdk 30
-        versionCode 6
+        versionCode 7
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
