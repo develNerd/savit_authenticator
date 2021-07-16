@@ -59,7 +59,7 @@ pipeline {
       }
     } 
 
-    stage('Publish') {
+    stage('Publish APKs') {
       steps {
         script {
               archiveArtifacts allowEmptyArchive: true,
@@ -74,8 +74,14 @@ pipeline {
             }
       }
     }
+     stage('Publish AABs') {
+      steps {
+        script {
+              archiveArtifacts allowEmptyArchive: true,
+                  artifacts: '**/*.aab'
 
-
-
+            }
+      }
+    }
   }
 }
