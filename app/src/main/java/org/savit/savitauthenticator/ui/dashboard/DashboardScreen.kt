@@ -338,8 +338,6 @@ fun RowAccountItem(isDark:Boolean,name:String,issuer:String,key:String,icon:Int,
                 .padding(end = 5.dp)) {
                 CustomProgressBar(progressMutiplyingFactor = progress,secondsRemaining)
             }
-
-
         }
     }
 
