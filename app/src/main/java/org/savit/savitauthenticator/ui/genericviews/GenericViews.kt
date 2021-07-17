@@ -471,6 +471,7 @@ fun InputField(inputFieldValue:String,inputFieldHint:String,onInputValueChange:(
     Column(modifier = Modifier.padding(10.dp)) {
         OutlinedTextField(
             maxLines = 1,
+            singleLine = true,
             value = inputFieldValue,
             onValueChange = onInputValueChange,
             label = { Text(text = inputFieldHint) },modifier = Modifier.fillMaxWidth(),

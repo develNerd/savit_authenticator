@@ -1,5 +1,6 @@
 package org.savit.savitauthenticator.ui.dashboard
 
+import android.R.attr
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
@@ -50,6 +51,21 @@ import org.savit.savitauthenticator.utils.otp.CountDownListener
 import org.savit.savitauthenticator.utils.otp.OtpProvider
 import org.savit.savitauthenticator.utils.otp.TotpCountdownTask
 import android.app.Activity
+import android.widget.Toast
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import android.R.attr.text
+
+import android.R.attr.label
+
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context.CLIPBOARD_SERVICE
+import androidx.compose.foundation.interaction.Interaction
+import androidx.compose.foundation.interaction.InteractionSource
+import androidx.core.content.ContextCompat
+
+import androidx.core.content.ContextCompat.getSystemService
 
 
 
@@ -57,7 +73,6 @@ import android.app.Activity
 
 private  val DEFAULT_INTERVAL:Int = 30
 private val TOTP_COUNTDOWN_REFRESH_PERIOD_MILLIS = 100L
-
 @ExperimentalFoundationApi
 @Composable
 fun DashboardScreen(viewModel: DashboardViewModel){
@@ -65,6 +80,8 @@ fun DashboardScreen(viewModel: DashboardViewModel){
     val userAccounts by viewModel.userAccounts.observeAsState()
     val setShowDeleteSnackbar by viewModel.showDeleteSnackbar.observeAsState(false)
     val isDark = isSystemInDarkTheme()
+    val context = LocalContext.current
+    val clipboard = context.applicationContext.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 
 
     Box(modifier = Modifier
@@ -92,20 +109,19 @@ fun DashboardScreen(viewModel: DashboardViewModel){
                     if (!isGrid!! && !userAccounts.isNullOrEmpty()){
                         LazyColumn(modifier = Modifier.fillMaxHeight()) {
                             items(userAccounts!!){userAccount ->
-                                RowAccountItem(isDark = isDark,userAccount.name?:"",userAccount.issuer?:"",userAccount.sharedKey,icon = userAccount.image,viewModel)
+                                RowAccountItem(isDark = isDark,userAccount.name?:"",userAccount.issuer?:"",userAccount.sharedKey,icon = userAccount.image,viewModel,context,clipboard)
                             }
                         }
                     }else if(isGrid!! && !userAccounts.isNullOrEmpty()){
                         LazyVerticalGrid(cells = GridCells.Fixed(2)) {
                             items(userAccounts!!){userAccount ->
-                                GridAccountItem(isDark = isDark,userAccount.name?:"",userAccount.issuer?:"",userAccount.sharedKey,icon = userAccount.image,viewModel)
+                                GridAccountItem(isDark = isDark,userAccount.name?:"",userAccount.issuer?:"",userAccount.sharedKey,icon = userAccount.image,viewModel,context,clipboard)
                             }
                         }
 
                     }
                 }
             }else if (userAccounts != null && userAccounts!!.isEmpty()){
-                val context = LocalContext.current
                 Box(modifier = Modifier
                     .fillMaxSize()
                     .padding(bottom = 80.dp)) {
@@ -119,7 +135,6 @@ fun DashboardScreen(viewModel: DashboardViewModel){
                         OutlinedButton(onClick = {
                             val intent = Intent(context as Activity, PinCameraActivity::class.java).setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             (context as Activity).startActivity(intent)
-
                         }) {
                             Icon(Icons.Default.Add, contentDescription = "",modifier = Modifier.padding(end = 10.dp))
                             Text(text = "Add User Account",color = if (isDark) Green201 else Green500)
@@ -226,7 +241,7 @@ fun RowAccountItemPreview(){
 
 
 @Composable
-fun RowAccountItem(isDark:Boolean,name:String,issuer:String,key:String,icon:Int,viewModel: DashboardViewModel){
+fun RowAccountItem(isDark:Boolean,name:String,issuer:String,key:String,icon:Int,viewModel: DashboardViewModel,context: Context,clipboard: ClipboardManager){
     var totpCountdownTask: TotpCountdownTask? = null
     var totpCounter: TotpCounter
     var otpProvider: OtpProvider
@@ -252,7 +267,6 @@ fun RowAccountItem(isDark:Boolean,name:String,issuer:String,key:String,icon:Int,
                 millisRemaining.toDouble() / secondsToMillis(totpCounter.getTimeStep())
             secondsRemaining = millisToSeconds(millisRemaining).toString()
             progress = progressPhase.toFloat()
-
         }
 
         override fun onTotpCounterValueChanged() {
@@ -287,8 +301,19 @@ fun RowAccountItem(isDark:Boolean,name:String,issuer:String,key:String,icon:Int,
         Box(modifier = Modifier
             .padding(7.dp)
             .fillMaxWidth()
-            .clickable {
-                setShowDeleteDialog(true)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onLongPress = {
+                        setShowDeleteDialog(true)
+                    },
+                    onTap = {
+                        val clip: ClipData = ClipData.newPlainText("SP", pin)
+                        clipboard.setPrimaryClip(clip)
+                        Toast
+                            .makeText(context, "Pin Copied", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                )
             }
             .background(
                 color = if (isDark) GreenTrans200 else UserAccountBg,
@@ -350,7 +375,7 @@ fun RowAccountItem(isDark:Boolean,name:String,issuer:String,key:String,icon:Int,
 
 
 @Composable
-fun GridAccountItem(isDark:Boolean,name:String,issuer:String,key:String,icon:Int,viewModel: DashboardViewModel){
+fun GridAccountItem(isDark:Boolean,name:String,issuer:String,key:String,icon:Int,viewModel: DashboardViewModel,context: Context,clipboard: ClipboardManager){
     var totpCountdownTask: TotpCountdownTask? = null
     val totpCounter: TotpCounter
     val otpProvider: OtpProvider
@@ -420,8 +445,19 @@ fun GridAccountItem(isDark:Boolean,name:String,issuer:String,key:String,icon:Int
                     color = if (isDark) GreenTrans200 else UserAccountBg,
                     shape = RoundedCornerShape(8)
                 )
-                .clickable {
-                    setShowDeleteDialog(true)
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onLongPress = {
+                            setShowDeleteDialog(true)
+                        },
+                        onTap = {
+                            val clip: ClipData = ClipData.newPlainText("SP", pin)
+                            clipboard.setPrimaryClip(clip)
+                            Toast
+                                .makeText(context, "Pin Copied", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                    )
                 }
                 .wrapContentHeight())
             {

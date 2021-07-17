@@ -306,7 +306,13 @@ private fun parseUri(uri: Uri, message:(String?) -> Unit) : UserAccount?{
         issuer.lowercase(Locale.getDefault()).contains("microsoft") -> R.drawable.microsoft
         issuer.lowercase(Locale.getDefault()).contains("google") -> R.drawable.google
         issuer.lowercase(Locale.getDefault()).contains("bitbucket") -> R.drawable.bitbucket
-        issuer.lowercase(Locale.getDefault()).contains("paypal") -> R.drawable.logos_paypal
+        issuer.lowercase(Locale.getDefault()).contains("linkedin") -> R.drawable.linkedin
+        issuer.lowercase(Locale.getDefault()).contains("gmail") -> R.drawable.gmail
+        issuer.lowercase(Locale.getDefault()).contains("dropbox") -> R.drawable.dropbox
+        issuer.lowercase(Locale.getDefault()).contains("bitcoin") -> R.drawable.bitcoin
+        issuer.lowercase(Locale.getDefault()).contains("discord") -> R.drawable.discord
+        issuer.lowercase(Locale.getDefault()).contains("gitlab") -> R.drawable.gitlab
+        issuer.lowercase(Locale.getDefault()).contains("aws") -> R.drawable.aws
         else -> R.drawable.logo_vector
     }
 

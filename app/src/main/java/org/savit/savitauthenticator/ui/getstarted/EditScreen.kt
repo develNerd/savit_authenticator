@@ -10,6 +10,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.getViewModel
@@ -51,7 +52,13 @@ fun EditScreen(){
             issuer.lowercase(Locale.getDefault()).contains("microsoft") -> R.drawable.microsoft
             issuer.lowercase(Locale.getDefault()).contains("google") -> R.drawable.google
             issuer.lowercase(Locale.getDefault()).contains("bitbucket") -> R.drawable.bitbucket
-            issuer.lowercase(Locale.getDefault()).contains("paypal") -> R.drawable.logos_paypal
+            issuer.lowercase(Locale.getDefault()).contains("linkedin") -> R.drawable.linkedin
+            issuer.lowercase(Locale.getDefault()).contains("gmail") -> R.drawable.gmail
+            issuer.lowercase(Locale.getDefault()).contains("dropbox") -> R.drawable.dropbox
+            issuer.lowercase(Locale.getDefault()).contains("bitcoin") -> R.drawable.bitcoin
+            issuer.lowercase(Locale.getDefault()).contains("discord") -> R.drawable.discord
+            issuer.lowercase(Locale.getDefault()).contains("gitlab") -> R.drawable.gitlab
+            issuer.lowercase(Locale.getDefault()).contains("aws") -> R.drawable.aws
             else -> R.drawable.logo_vector
         }
         Spacer(modifier = Modifier.size(10.dp))
@@ -63,7 +70,7 @@ fun EditScreen(){
         },modifier = Modifier
                 .fillMaxWidth()
                 .padding(10.dp),enabled = validate()) {
-            Text(text = "Add Account",color = textColorDark)
+            Text(text = "Add Account",color = Color.White)
         }
 
     }
